@@ -516,49 +516,36 @@ class Trilobot():
         So to extend the distance that can be measured, use a larger timeout.
         """
 
-        # Start timing
-        start_time = time.perf_counter_ns()
-        time_elapsed = 0
-        count = 0  # Track now many samples taken
-        total_pulse_durations = 0
-        distance = -999
+        TRIG = self.ULTRA_TRIG_PIN
+        ECHO = self.ULTRA_ECHO_PIN
+    
+        # ensure pins are configured
+        GPIO.setup(TRIG, GPIO.OUT)
+        GPIO.setup(ECHO, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+    
+        # trigger
+        GPIO.output(TRIG, False)
+        time.sleep(0.002)
+        GPIO.output(TRIG, True)
+        time.sleep(0.00001)
+        GPIO.output(TRIG, False)
+    
+        # wait for echo
+        start = time.perf_counter()
+        while GPIO.input(ECHO) == 0 and (time.perf_counter() - start) < timeout:
+            pass
+        t0 = time.perf_counter()
+    
+        while GPIO.input(ECHO) == 1 and (time.perf_counter() - start) < timeout:
+            pass
+        t1 = time.perf_counter()
+    
+        if t1 <= t0:
+            return 0.0
+    
+        # distance = (time * speed_of_sound) / 2
+        return ((t1 - t0) * 34300) / 2
 
-        # Loop until the timeout is exceeded or all samples have been taken
-        while (count < samples) and (time_elapsed < timeout * 1000000):
-            # Trigger
-            GPIO.output(self.ULTRA_TRIG_PIN, 1)
-            time.sleep(.00001)  # 10 microseconds
-            GPIO.output(self.ULTRA_TRIG_PIN, 0)
-
-            # Wait for the ECHO pin to go high
-            # wait for the pulse rise
-            GPIO.wait_for_edge(self.ULTRA_ECHO_PIN, GPIO.RISING, timeout=timeout)
-            pulse_start = time.perf_counter_ns()
-
-            # And wait for it to fall
-            GPIO.wait_for_edge(self.ULTRA_ECHO_PIN, GPIO.FALLING, timeout=timeout)
-            pulse_end = time.perf_counter_ns()
-
-            # get the duration
-            pulse_duration = pulse_end - pulse_start - offset
-            if pulse_duration < 0:
-                pulse_duration = 0  # Prevent negative readings when offset was too high
-
-            # Only count reading if achieved in less than timeout total time
-            if pulse_duration < timeout * 1000000:
-                # Convert to distance and add to total
-                total_pulse_durations += pulse_duration
-                count += 1
-
-            time_elapsed = time.perf_counter_ns() - start_time
-
-        # Calculate average distance in cm if any successful reading were made
-        if count > 0:
-            # Calculate distance using speed of sound divided by number of samples and half
-            # that as sound pulse travels from robot to obstacle and back (twice the distance)
-            distance = total_pulse_durations * self.SPEED_OF_SOUND_CM_NS / (2 * count)
-
-        return distance
 
     #########
     # Servo #

@@ -287,6 +287,7 @@ class SimpleController():
         self.controller = None
         devices = [InputDevice(path) for path in list_devices()]
         for device in devices:
+            print(device)
             if self.exact_match:
                 if self.controller_to_find == device.name:
                     self.controller = device

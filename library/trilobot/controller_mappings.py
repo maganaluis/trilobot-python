@@ -268,6 +268,40 @@ def create_ps4_wireless_controller(stick_deadzone_percent=0.1):
     return controller
 
 
+def create_tgz_wireless_controller(stick_deadzone_percent=0.1):
+    """ Create a controller class for the PlayStation 4 Wireless controller.
+    stick_deadzone_percent: the deadzone amount to apply to the controller's analog sticks
+    """
+    controller = SimpleController("TGZ Controller", exact_match=True)
+
+    # Button and axis registrations for PS4 Controller
+    controller.register_button("Cross", 304, alt_name="A")
+    controller.register_button("Circle", 305, alt_name="B")
+    controller.register_button("Square", 308, alt_name="X")
+    controller.register_button("Triangle", 307, alt_name="Y")
+    controller.register_button("Options", 315, alt_name='Start')
+    controller.register_button("Share", 314, alt_name='Select')
+    controller.register_button("PS", 316, alt_name='Home')
+    controller.register_button("L1", 310, alt_name="LB")
+    controller.register_button("L2", 312, alt_name="LT")
+    controller.register_button("R1", 311, alt_name="RB")
+    controller.register_button("R2", 313, alt_name="RT")
+    controller.register_axis_as_button("Left", 16, -1, 0)
+    controller.register_axis_as_button("Right", 16, 1, 0)
+    controller.register_axis_as_button("Up", 17, -1, 0)
+    controller.register_axis_as_button("Down", 17, 1, 0)
+    controller.register_button("L3", 317, alt_name='LS')
+    controller.register_button("R3", 318, alt_name='RS')
+
+    controller.register_axis("LX", 0, 0, 255, deadzone_percent=stick_deadzone_percent)
+    controller.register_axis("LY", 1, 0, 255, deadzone_percent=stick_deadzone_percent)
+    controller.register_axis("RX", 3, 0, 255, deadzone_percent=stick_deadzone_percent)
+    controller.register_axis("RY", 4, 0, 255, deadzone_percent=stick_deadzone_percent)
+    controller.register_trigger_axis("L2", 2, 0, 255, alt_name="LT")
+    controller.register_trigger_axis("R2", 5, 0, 255, alt_name="RT")
+    return controller
+
+
 def create_ps4_wireless_controller_touchpad():
     """ Create a controller class for the PlayStation 4 Wireless controller's touchpad.
     """
@@ -371,6 +405,7 @@ def choose_controller():
                        ("DualSense Wireless Controller", create_ps5_wireless_controller),
                        ("DualSense Wireless Controller Motion Sensors", create_ps5_wireless_controller_motion),
                        ("Gioteck Smart TV+ Duo Controller", create_gioteck_smart_duo_controller),
+                       ("TGZ Controller", create_tgz_wireless_controller),
                        ]
 
     print("Currently supported controllers:")
